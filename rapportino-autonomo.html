@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d9488">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rapportino">
+<title>Il mio rapportino</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#eef3f2;--card:#fff;--tx:#14201e;--mut:#62706d;--ac:#0d9488;--ac2:#0f766e;--acx:#fff;--bd:#d9e2e0;--tint:rgba(13,148,136,.13);--warn:#b45309;--sh:0 2px 14px rgba(20,32,30,.08);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1514;--card:#1a2321;--tx:#eef5f3;--mut:#9db0ac;--ac:#2dd4bf;--ac2:#14b8a6;--acx:#042f2a;--bd:#2c3a37;--tint:rgba(45,212,191,.16);--warn:#fbbf24;--sh:0 2px 14px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#0f1514;--card:#1a2321;--tx:#eef5f3;--mut:#9db0ac;--ac:#2dd4bf;--ac2:#14b8a6;--acx:#042f2a;--bd:#2c3a37;--tint:rgba(45,212,191,.16);--warn:#fbbf24;--sh:0 2px 14px rgba(0,0,0,.35)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:17px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:14px 16px 130px}
+h1{font-size:1.75rem;font-weight:800;letter-spacing:-.02em;margin:10px 0 6px;color:var(--ac)}
+h2{font-size:1.15rem;font-weight:700;margin:0 0 12px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -6px 24px rgba(0,0,0,.08);z-index:20}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:transparent;padding:8px 2px;min-height:60px;font-size:.8rem;font-weight:600;color:var(--mut);border-radius:16px}
+nav button .ic{font-size:1.55rem;line-height:1}
+nav button.on{background:var(--tint);color:var(--ac)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{background:var(--card);border:1.5px solid var(--bd);border-radius:16px;padding:14px 16px;min-height:52px;font-weight:600;cursor:pointer;transition:transform .08s}
+button:active{transform:scale(.97)}
+button.p{background:linear-gradient(135deg,var(--ac),var(--ac2));color:var(--acx);border:0;font-weight:700;box-shadow:0 4px 14px rgba(13,148,136,.28)}
+input,textarea,select{width:100%;font-size:17px;background:var(--bg);border:1.5px solid var(--bd);border-radius:14px;padding:14px;margin:6px 0 14px;outline:0}
+input:focus,textarea:focus,select:focus{border-color:var(--ac);background:var(--card)}
+input[type=checkbox]{width:24px!important;height:24px;accent-color:var(--ac);padding:0}
+label{display:block;font-size:.85rem;font-weight:600;color:var(--mut);letter-spacing:.01em}
+.card{background:var(--card);border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:var(--sh)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.mut{color:var(--mut);font-size:.92rem}
+.stat{display:flex;flex-wrap:wrap;gap:8px 22px;margin:8px 0 12px}.stat b{display:block;font-size:1.65rem;line-height:1.1}
+.item{display:flex;justify-content:space-between;gap:10px;padding:14px 0;border-top:1px solid var(--bd);align-items:center}
+.item:first-child{border-top:0}
+.cl{cursor:pointer;min-height:60px}
+.warn{color:var(--warn)}
+.done{text-decoration:line-through;color:var(--mut)}
+.mic.rec{background:#dc2626;color:#fff;border-color:#dc2626}
+.ans{white-space:pre-wrap}
+.job{border-top:1px solid var(--bd)}
+.jobh{display:flex;align-items:center;gap:10px;padding:14px 0;cursor:pointer;min-height:64px}
+.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{color:var(--ac);font-size:1.8rem;line-height:1;transition:transform .15s}
+.job.open .chev{transform:rotate(90deg)}
+.jobd{padding:0 0 16px}
+.kv{display:flex;gap:10px;padding:5px 0}.kv span:first-child{color:var(--mut);flex:0 0 104px;font-size:.92rem}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.acts button:last-child{grid-column:1/-1}
+.acts button{min-height:52px}
+.acts .del{color:#dc2626}
+.badge{font-size:.76rem;margin-left:8px;padding:3px 10px;border-radius:99px;background:var(--tint);color:var(--warn);font-weight:700;white-space:nowrap;vertical-align:middle}
+.badge.ok{color:var(--ac)}
+#sug button{width:100%;text-align:left;border:0;background:transparent;min-height:50px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Il mio rapportino</h1>
+<p class="mut" id="sync" style="margin:-6px 0 6px"></p>
+<nav id="nav">
+<button data-t="nuovo" class="on"><span class="ic">✍️</span>Nuovo</button>
+<button data-t="registro"><span class="ic">📋</span>Registro</button>
+<button data-t="fare"><span class="ic">✅</span>Da fare</button>
+</nav>
+
+<section id="t-nuovo">
+<input id="voce" type="hidden">
+<p class="mut" id="nota"></p>
+<div class="card">
+<h2>Rapportino</h2>
+<label>Data</label><input id="f-data" type="date">
+<label>Cliente</label><input id="f-cliente" autocomplete="off" placeholder="Es. Signora Maria"><div id="sug" class="card" hidden style="padding:4px;margin:-6px 0 10px"></div>
+<div id="persbox" hidden><label>Persona (facoltativa)</label>
+<select id="f-pers" style="margin:6px 0 10px"></select>
+<div class="row" style="margin-bottom:10px"><input id="f-newp" placeholder="Nuova persona" style="margin:0"><button id="addp" style="flex:0 0 auto">Aggiungi</button></div></div>
+<label>Indirizzo</label><input id="f-ind">
+<label>Lavoro svolto</label><textarea id="f-lavoro" rows="2"></textarea>
+<button id="mic" class="mic" hidden style="width:100%;margin:-4px 0 14px">🎤 Detta il lavoro</button>
+<div class="row"><div><label>Ore</label><input id="f-ore" inputmode="decimal"></div><div><label>Km</label><input id="f-km" inputmode="decimal"></div></div>
+<label>Materiali (uno per riga, es. «3 raccordi»)</label><textarea id="f-mat" rows="3"></textarea>
+<label>Costo materiali (€)</label><input id="f-costo" inputmode="decimal" placeholder="Es. 35,50">
+<label>Problemi</label><input id="f-prob">
+<label>Da fare (uno per riga)</label><textarea id="f-todo" rows="2"></textarea>
+<label>Foto (facoltative, max 4)</label><input id="f-foto" type="file" accept="image/*" multiple>
+<div id="anteprime" class="mut" style="margin:-6px 0 10px"></div>
+<button id="rmfoto" hidden style="margin-bottom:10px">Togli le foto salvate</button>
+<button id="salva" class="p" style="width:100%">Salva rapportino</button>
+<button id="annulla" hidden style="width:100%;margin-top:8px">Annulla modifica</button>
+</div>
+</section>
+
+<section id="t-registro" hidden>
+<button id="newcl" class="p" style="width:100%;margin-bottom:10px">+ Aggiungi cliente</button>
+<div class="card" id="clform" hidden><label>Nome</label><input id="c-n"><label>Indirizzo</label><input id="c-i"><label>Telefono</label><input id="c-t" inputmode="tel">
+<label>Persone di riferimento (una per riga)</label><textarea id="c-p" rows="2"></textarea><div class="row"><button id="c-s" class="p">Salva cliente</button><button id="c-x">Annulla</button></div></div>
+<div class="row"><input id="mese" type="month" aria-label="Mese"><button id="tutti" style="flex:0 0 auto;margin:4px 0 10px">Tutti i mesi</button></div>
+<label style="display:flex;gap:8px;align-items:center;margin-bottom:10px;color:inherit;font-size:1rem"><input id="solo" type="checkbox" style="width:auto;margin:0"> Solo lavori da fatturare</label>
+<div class="row"><input id="cerca" placeholder="Cerca un cliente"><button id="azcerca" style="flex:0 0 auto;margin:4px 0 10px">Azzera</button></div>
+<div id="clienti"></div>
+<div id="dett"></div>
+<button id="csv" style="width:100%;margin-top:8px">Esporta in Excel (CSV)</button>
+<div class="card" style="margin-top:16px">
+<h2>Backup completo</h2>
+<p class="mut" id="lastbk"></p>
+<label style="display:flex;gap:10px;align-items:center;margin-bottom:12px;color:inherit;font-size:1rem"><input id="bk-foto" type="checkbox" checked style="margin:0"> Includi le foto</label>
+<button id="bk" class="p" style="width:100%">Scarica backup</button>
+<label style="margin-top:18px">Ripristina da un backup</label>
+<input id="rs-file" type="file" accept=".json,application/json">
+<div id="rs-info" class="mut"></div>
+<div class="row" id="rs-btns" hidden style="margin-top:10px"><button id="rs-merge" class="p">Unisci ai dati attuali</button><button id="rs-rep">Sostituisci tutto</button></div>
+</div>
+</section>
+
+<section id="t-fare" hidden>
+<div class="card">
+<div class="row"><input id="nt" placeholder="Cosa devi ricordare?" style="margin:0"><button id="addt" class="p" style="flex:0 0 auto">Aggiungi</button></div>
+</div>
+<div class="card" id="todos"></div>
+</section>
+
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const K='rapportino_v1';
+let S={reports:[],todos:[]};
+try{const r=localStorage.getItem(K);if(r)S=JSON.parse(r)}catch(e){}
+S.clients=S.clients||[];
+let dref=null,pt;
+function push(){if(!dref)return;clearTimeout(pt);pt=setTimeout(()=>dref.set({json:JSON.stringify(S),ts:S.ts}).then(()=>{$('sync').textContent='Sincronizzato ✓'}).catch(()=>{$('sync').textContent='Sincronizzazione non riuscita'}),800)}
+const save=()=>{S.ts=Date.now();try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}push();try{fillDl()}catch(e){}};
+const num=v=>{const n=parseFloat(String(v||'').replace(',','.'));return isNaN(n)?0:n};
+const fmt=n=>(Math.round(n*100)/100).toString().replace('.',',');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function el(tag,txt,cls){const e=document.createElement(tag);if(txt!=null)e.textContent=txt;if(cls)e.className=cls;return e}
+const lines=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
+function parseMat(l){const m=l.match(/^(\d+(?:[.,]\d+)?)\s+(.+)$/);return m?{q:num(m[1]),n:m[2]}:{q:1,n:l}}
+
+/* tab */
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  ['nuovo','registro','fare'].forEach(t=>$('t-'+t).hidden=t!==b.dataset.t);
+  if(b.dataset.t==='registro')drawReg();if(b.dataset.t==='fare')drawTodos();
+});
+
+/* nuovo */
+$('f-data').value=today();
+$('salva').onclick=()=>{
+  const c=$('f-cliente').value.trim();
+  if(!c){alert('Scrivi il nome del cliente.');return}
+  const rep={id:editId||uid(),data:$('f-data').value||today(),cliente:c,ind:$('f-ind').value.trim(),lavoro:$('f-lavoro').value.trim(),
+    ore:num($('f-ore').value),km:num($('f-km').value),mat:lines($('f-mat').value),costo:num($('f-costo').value),pers:($('f-pers').value&&$('f-pers').value!=='__new')?$('f-pers').value:'',prob:$('f-prob').value.trim()};
+  const ix=editId?S.reports.findIndex(z=>z.id===editId):-1;
+  if(ix>=0)S.reports[ix]=rep;else S.reports.unshift(rep);
+  if(pend.length){FO[rep.id]=(FO[rep.id]||[]).concat(pend).slice(0,4);saveFo();pend=[];$('anteprime').textContent=''}
+  if(!S.clients.some(x=>x.nome.toLowerCase()===c.toLowerCase()))S.clients.push({id:uid(),nome:c,ind:$('f-ind').value.trim(),tel:''});
+  lines($('f-todo').value).forEach(t=>S.todos.unshift({id:uid(),t,fatto:false}));
+  save();
+  ['voce','f-cliente','f-ind','f-lavoro','f-ore','f-km','f-mat','f-prob','f-todo'].forEach(i=>$(i).value='');
+  $('f-data').value=today();$('sug').hidden=true;
+  const was=editId;endEdit();$('nota').textContent=was?'Modifiche salvate ✓':'Rapportino salvato ✓';
+  if(was)document.querySelector('#nav button[data-t="registro"]').click();
+};
+
+/* dettatura (se il browser la supporta) e salvataggio file */
+(function(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR){
+    $('mic').hidden=false;
+    let rec=null,on=false;const LAB='🎤 Detta il lavoro';
+    $('mic').onclick=()=>{
+      if(on){if(rec)rec.stop();return}
+      rec=new SR();rec.lang='it-IT';rec.interimResults=false;rec.continuous=true;
+      const base=$('f-lavoro').value.trim();
+      rec.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript+' ';$('f-lavoro').value=(base+' '+t).trim()};
+      rec.onend=()=>{on=false;$('mic').classList.remove('rec');$('mic').textContent=LAB};
+      rec.onerror=()=>{};
+      try{rec.start();on=true;$('mic').classList.add('rec');$('mic').textContent='⏹ Stop'}catch(e){}
+    };
+  }
+  window._d={save:async({filename,data})=>{
+    const type=filename.endsWith('.csv')?'text/csv;charset=utf-8':filename.endsWith('.json')?'application/json':'application/octet-stream';
+    const blob=data instanceof Blob?data:new Blob([data],{type});
+    try{
+      const file=new File([blob],filename,{type:blob.type||type});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:filename});return{status:'delivered'}}
+    }catch(e){if(e&&e.name==='AbortError')return{status:'cancelled'}}
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.append(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);return{status:'saved'}
+  }};
+})();
+
+/* registro */
+function totali(list){
+  const m={};list.forEach(r=>r.mat.forEach(l=>{const p=parseMat(l),k=p.n.toLowerCase();m[k]=m[k]||{n:p.n,q:0};m[k].q+=p.q}));
+  return{u:list.length,ore:list.reduce((a,r)=>a+r.ore,0),km:list.reduce((a,r)=>a+r.km,0),costo:list.reduce((a,r)=>a+(r.costo||0),0),mat:Object.values(m)};
+}
+function drawReg(sel){
+  const q=$('cerca').value.toLowerCase(),box=$('clienti');box.textContent='';box.hidden=false;$('dett').textContent='';
+  const g={};fr().forEach(r=>{(g[r.cliente]=g[r.cliente]||[]).push(r)});
+  if(!$('mese').value&&!$('solo').checked)S.clients.forEach(c=>{if(!g[c.nome])g[c.nome]=[]});
+  const names=Object.keys(g).filter(n=>n.toLowerCase().includes(q)||((S.clients.find(c=>c.nome===n)||{}).persone||[]).some(p=>p.toLowerCase().includes(q))).sort();
+  const card=el('div',null,'card');
+  if(!names.length)card.append(el('p','Nessun rapportino ancora.','mut'));
+  names.forEach(n=>{const t=totali(g[n]);const it=el('div',null,'item cl');
+    const l=el('div');l.append(el('b',n),el('div',t.u+(t.u===1?' uscita · ':' uscite · ')+fmt(t.ore)+' ore','mut'));
+    it.append(l,el('span','›'));it.onclick=()=>showCl(n,g[n]);card.append(it)});
+  box.append(card);
+  if(sel&&g[sel])showCl(sel,g[sel]);
+}
+function closeCl(){$('dett').textContent='';$('clienti').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}
+function showCl(n,list){
+  $('clienti').hidden=true;
+  const t=totali(list),d=$('dett');d.textContent='';const c=el('div',null,'card');
+  const back=el('button','← Torna ai clienti');back.style.cssText='width:100%;margin-bottom:10px';back.onclick=closeCl;c.append(back);
+  c.append(el('h2','Resoconto · '+n));
+  let cc=S.clients.find(x=>x.nome===n);if(!cc){cc={id:uid(),nome:n,ind:'',tel:'',persone:[]};S.clients.push(cc)}
+  if(cc){c.append(el('div',[cc.ind,cc.tel].filter(Boolean).join(' · ')||'Nessun indirizzo o telefono','mut'));
+    const dx=el('button','Elimina cliente');dx.style.margin='8px 0';
+    dx.onclick=()=>{if(confirm('Eliminare il cliente dall’elenco? I rapportini restano.')){S.clients=S.clients.filter(x=>x!==cc);save();drawReg()}};c.dx=dx;persUI(c,cc)}
+  const st=el('div',null,'stat');
+  [['uscite',t.u],['ore',fmt(t.ore)],['km',fmt(t.km)]].concat(t.costo?[['€ materiali',fmt(t.costo)]]:[],list.some(r=>!r.fatt)?[['da fatturare',list.filter(r=>!r.fatt).length]]:[]).forEach(([k,v])=>{const s=el('div');s.append(el('b',String(v)),el('span',k,'mut'));st.append(s)});
+  c.append(st);
+  const fb=el('button','Copia riepilogo per fattura');fb.style.cssText='width:100%;margin:10px 0';
+  fb.onclick=async()=>{
+    if(!list.length){fb.textContent='Nessun lavoro da riepilogare';return}
+    const ds=list.map(r=>r.data).sort(),f=x=>x.split('-').reverse().join('/');
+    const txt=['Cliente: '+n,'Periodo: dal '+f(ds[0])+' al '+f(ds[ds.length-1]),'Uscite: '+t.u,'Ore totali: '+fmt(t.ore),'Km totali: '+fmt(t.km)].concat(t.costo?['Costo materiali: '+fmt(t.costo)+' euro']:[],['','Materiali:'],t.mat.map(m=>'- '+fmt(m.q)+' × '+m.n),['','Lavori:'],list.slice().sort((a,b)=>a.data<b.data?-1:1).map(r=>'- '+f(r.data)+': '+(r.lavoro||'—')+' ('+fmt(r.ore)+' h)')).join('\n');
+    try{await navigator.clipboard.writeText(txt);fb.textContent='Copiato ✓'}catch(e){prompt('Copia il riepilogo:',txt)}
+  };
+  c.append(fb);
+  const lbl=el('div','Includi nell’estratto:','mut');lbl.style.marginTop='8px';c.append(lbl);
+  const chk={},og=el('div');og.style.cssText='display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0 10px';
+  [['tot','Totale'],['anni','Anni'],['mesi','Mesi'],['sett','Settimane'],['elenco','Elenco lavori']].forEach(([k,t])=>{
+    const lb=document.createElement('label'),cb=document.createElement('input');
+    lb.style.cssText='display:flex;gap:6px;align-items:center;color:inherit;font-size:.95rem';
+    cb.type='checkbox';cb.checked=true;cb.style.cssText='width:auto;margin:0';chk[k]=cb;lb.append(cb,document.createTextNode(t));og.append(lb)});
+  c.append(og);
+  const ex=el('div',null,'row');ex.style.margin='0 0 10px';
+  const b1=el('button','Scarica estratto (PDF)'),b2=el('button','Scarica estratto (CSV)');
+  b1.onclick=()=>exportCliente(n,'pdf',b1,chk);b2.onclick=()=>exportCliente(n,'csv',b2,chk);
+  ex.append(b1,b2);c.append(ex);
+  list.slice().sort((a,b)=>a.data<b.data?1:-1).forEach(r=>{
+    const f=x=>x.split('-').reverse().join('/');
+    const it=el('div',null,'job'),head=el('div',null,'jobh'),l=el('div');
+    l.style.cssText='min-width:0;flex:1';
+    const tt=el('div');tt.append(el('b',f(r.data)+(r.ore?' · '+fmt(r.ore)+' h':'')));
+    const bd=el('span',r.fatt?'Fatturato':'Da fatturare','badge'+(r.fatt?' ok':''));tt.append(bd);
+    l.append(tt,el('div',(r.pers?r.pers+' · ':'')+(r.lavoro||'—'),'mut one'));
+    if(r.mat.length)l.append(el('div',r.mat.join(', '),'mut one'));
+    head.append(l,el('span','›','chev'));
+    const dv=el('div',null,'jobd');dv.hidden=true;
+    const det=()=>{dv.textContent='';
+      [['Persona',r.pers],['Indirizzo',r.ind],['Lavoro',r.lavoro],['Ore',r.ore?fmt(r.ore):''],['Km',r.km?fmt(r.km):''],['Materiali',r.mat.join(', ')],['Costo materiali',r.costo?fmt(r.costo)+' €':''],['Problemi',r.prob]].forEach(([k,v])=>{if(!v)return;const p=el('div',null,'kv');p.append(el('span',k),el('span',v));dv.append(p)});
+      const ph=FO[r.id]||[];
+      if(ph.length){const g=el('div');g.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px';
+        ph.forEach(s=>{const im=new Image();im.src=s;im.style.cssText='width:100%;border-radius:8px';g.append(im)});dv.append(g)}
+      const bx=el('div',null,'acts'),mb=el('button','Modifica'),pb=el('button','PDF'),x=el('button','Elimina','del');
+      mb.onclick=()=>startEdit(r);pb.onclick=()=>makePdf(r);
+      x.onclick=()=>{if(confirm('Eliminare questo rapportino?')){S.reports=S.reports.filter(z=>z.id!==r.id);delete FO[r.id];saveFo();save();drawReg(n)}};
+      const tg=el('button',r.fatt?'Segna come da fatturare':'Segna come fatturato');tg.style.cssText='width:100%;margin-top:10px';
+      tg.onclick=()=>{r.fatt=!r.fatt;save();if($('solo').checked){drawReg(n);return}bd.textContent=r.fatt?'Fatturato':'Da fatturare';bd.className='badge'+(r.fatt?' ok':'');tg.textContent=r.fatt?'Segna come da fatturare':'Segna come fatturato'};
+      dv.append(tg);bx.append(mb,pb,x);dv.append(bx)};
+    head.onclick=()=>{if(dv.hidden)det();dv.hidden=!dv.hidden;it.classList.toggle('open',!dv.hidden)};
+    it.append(head,dv);c.append(it)});
+  const back2=el('button','← Torna ai clienti');back2.style.cssText='width:100%;margin-top:12px';back2.onclick=closeCl;c.append(back2);
+  if(c.dx){c.dx.style.cssText='width:100%;margin-top:12px;color:#dc2626';c.append(c.dx)}
+  d.append(c);d.scrollIntoView({behavior:'smooth'});
+}
+function fr(){const m=$('mese').value,s=$('solo').checked;return S.reports.filter(r=>(!m||r.data.startsWith(m))&&(!s||!r.fatt))}
+$('cerca').oninput=()=>drawReg();
+$('azcerca').onclick=()=>{$('cerca').value='';drawReg();$('cerca').focus()};
+$('mese').onchange=()=>drawReg();
+$('solo').onchange=()=>drawReg();
+function names(){const ns=new Set(S.clients.map(c=>c.nome));S.reports.forEach(r=>ns.add(r.cliente));return[...ns].sort()}
+function drawSug(){
+  const q=$('f-cliente').value.trim().toLowerCase(),b=$('sug');b.textContent='';
+  if(!q){b.hidden=true;return}
+  const all=names().filter(n=>n.toLowerCase().includes(q)&&n.toLowerCase()!==q);
+  const m=all.filter(n=>n.toLowerCase().startsWith(q)).concat(all.filter(n=>!n.toLowerCase().startsWith(q))).slice(0,5);
+  if(!m.length){b.hidden=true;return}
+  m.forEach(n=>{const x=el('button',n);x.style.cssText='width:100%;text-align:left;border:0;background:transparent';
+    x.onmousedown=e=>e.preventDefault();
+    x.onclick=()=>{$('f-cliente').value=n;const c=S.clients.find(z=>z.nome===n);
+      if(c&&c.ind)$('f-ind').value=c.ind;
+      else{const r=S.reports.find(z=>z.cliente===n&&z.ind);if(r&&!$('f-ind').value)$('f-ind').value=r.ind}
+      b.hidden=true;drawPers();$('f-lavoro').focus()};
+    b.append(x)});
+  b.hidden=false}
+function fillDl(){drawSug()}
+$('f-cliente').oninput=()=>{drawSug();drawPers()};
+$('f-cliente').onfocus=drawSug;
+$('f-cliente').onblur=()=>setTimeout(()=>{$('sug').hidden=true},200);
+fillDl();
+$('f-cliente').onchange=()=>{const c=S.clients.find(x=>x.nome.toLowerCase()===$('f-cliente').value.trim().toLowerCase());if(c&&!$('f-ind').value)$('f-ind').value=c.ind||'';drawPers()};
+$('newcl').onclick=()=>{$('clform').hidden=!$('clform').hidden;if(!$('clform').hidden)$('c-n').focus()};
+$('c-x').onclick=()=>{$('clform').hidden=true};
+$('c-s').onclick=()=>{const n=$('c-n').value.trim();if(!n){alert('Scrivi il nome del cliente.');return}
+  if(S.clients.some(x=>x.nome.toLowerCase()===n.toLowerCase())){alert('Questo cliente esiste già.');return}
+  S.clients.push({id:uid(),nome:n,ind:$('c-i').value.trim(),tel:$('c-t').value.trim(),persone:lines($('c-p').value)});save();
+  ['c-n','c-i','c-t','c-p'].forEach(i=>$(i).value='');$('clform').hidden=true;$('mese').value='';drawReg(n)};
+$('tutti').onclick=()=>{$('mese').value='';drawReg()};
+$('csv').onclick=async()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[['Data','Cliente','Persona','Indirizzo','Lavoro','Ore','Km','Materiali','Costo materiali','Problemi','Fatturato']].concat(
+    fr().map(r=>[r.data,r.cliente,r.pers||'',r.ind,r.lavoro,fmt(r.ore),fmt(r.km),r.mat.join(' | '),fmt(r.costo||0),r.prob,r.fatt?'Sì':'No']));
+  const data='\ufeff'+rows.map(r=>r.map(q).join(';')).join('\r\n');
+  try{if(!window._d)throw 0;await window._d.save({filename:'rapportini.csv',data})}
+  catch(e){try{await navigator.clipboard.writeText(data);alert('Download non disponibile: ho copiato i dati, incollali in Excel.')}catch(_){alert('Esportazione non disponibile qui.')}}
+};
+
+/* foto e PDF (le foto restano solo su questo dispositivo) */
+const KF='rapportino_foto_v1';
+let FO={};try{FO=JSON.parse(localStorage.getItem(KF)||'{}')}catch(e){}
+const saveFo=()=>{try{localStorage.setItem(KF,JSON.stringify(FO))}catch(e){alert('Spazio per le foto esaurito: elimina qualche rapportino vecchio.')}};
+let pend=[];
+function shrink(f){return new Promise(res=>{const rd=new FileReader();rd.onload=()=>{const im=new Image();
+  im.onload=()=>{const s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.7))};
+  im.onerror=()=>res(null);im.src=rd.result};rd.onerror=()=>res(null);rd.readAsDataURL(f)})}
+$('f-foto').onchange=async e=>{
+  for(const f of e.target.files){if(pend.length+(editId&&FO[editId]?FO[editId].length:0)>=4)break;const d=await shrink(f);if(d)pend.push(d)}
+  e.target.value='';phInfo()};
+let editId=null;
+function phInfo(){const n=editId&&FO[editId]?FO[editId].length:0;$('rmfoto').hidden=!n;
+  $('anteprime').textContent=[n?n+(n===1?' foto già salvata':' foto già salvate'):'',pend.length?pend.length+(pend.length===1?' nuova foto':' nuove foto'):''].filter(Boolean).join(' · ')}
+function startEdit(r){
+  editId=r.id;pend=[];
+  $('f-data').value=r.data;$('f-cliente').value=r.cliente;$('f-ind').value=r.ind||'';$('f-lavoro').value=r.lavoro||'';
+  $('f-ore').value=r.ore?fmt(r.ore):'';$('f-km').value=r.km?fmt(r.km):'';$('f-mat').value=r.mat.join('\n');$('f-prob').value=r.prob||'';$('f-costo').value=r.costo?fmt(r.costo):'';$('f-todo').value='';
+  $('salva').textContent='Salva modifiche';$('annulla').hidden=false;$('sug').hidden=true;$('nota').textContent='Stai modificando un rapportino.';
+  phInfo();drawPers(r.pers||'');document.querySelector('#nav button[data-t="nuovo"]').click();window.scrollTo(0,0)}
+function endEdit(){editId=null;pend=[];$('f-costo').value='';try{drawPers('')}catch(e){}$('salva').textContent='Salva rapportino';$('annulla').hidden=true;$('rmfoto').hidden=true}
+$('annulla').onclick=()=>{endEdit();['voce','f-cliente','f-ind','f-lavoro','f-ore','f-km','f-mat','f-prob','f-todo'].forEach(i=>$(i).value='');$('f-data').value=today();drawPers('');$('anteprime').textContent='';$('nota').textContent='';
+  document.querySelector('#nav button[data-t="registro"]').click()};
+$('rmfoto').onclick=()=>{if(editId&&confirm('Togliere le foto salvate di questo rapportino?')){delete FO[editId];saveFo();phInfo()}};
+async function makePdf(r){
+  if(!window.jspdf){alert('Generatore PDF non disponibile.');return}
+  const doc=new window.jspdf.jsPDF({unit:'mm',format:'a4'});let y=20;const f=x=>x.split('-').reverse().join('/');
+  const put=(t,sz,b)=>{doc.setFontSize(sz);doc.setFont('helvetica',b?'bold':'normal');doc.splitTextToSize(String(t),170).forEach(l=>{if(y>280){doc.addPage();y=20}doc.text(l,20,y);y+=sz*0.5})};
+  put('Rapportino di lavoro',18,1);y+=4;
+  put('Data: '+f(r.data),11);put('Cliente: '+r.cliente,11);if(r.pers)put('Persona: '+r.pers,11);if(r.ind)put('Indirizzo: '+r.ind,11);y+=3;
+  put('Lavoro svolto',12,1);put(r.lavoro||'-',11);y+=3;
+  put('Ore: '+fmt(r.ore)+'     Km: '+fmt(r.km),11);y+=3;
+  if(r.costo){put('Costo materiali: '+fmt(r.costo)+' euro',11);y+=3}
+  if(r.mat.length){put('Materiali',12,1);r.mat.forEach(m=>put('- '+m,11));y+=3}
+  if(r.prob){put('Problemi',12,1);put(r.prob,11)}
+  const ph=FO[r.id]||[];
+  if(ph.length){y+=4;put('Foto',12,1);
+    for(const d of ph){const p=doc.getImageProperties(d);let w=80,h=w*p.height/p.width;if(h>100){h=100;w=h*p.width/p.height}
+      if(y+h>285){doc.addPage();y=20}doc.addImage(d,'JPEG',20,y,w,h);y+=h+5}}
+  const name='rapportino-'+r.cliente.replace(/[^a-z0-9]+/gi,'-')+'-'+r.data+'.pdf';
+  try{if(!window._d)throw 0;await window._d.save({filename:name,data:doc.output('blob')})}
+  catch(e){alert('Download del PDF non disponibile qui.')}
+}
+
+/* persone di riferimento */
+function drawPers(sel){
+  const c=S.clients.find(x=>x.nome.toLowerCase()===$('f-cliente').value.trim().toLowerCase());
+  const s=$('f-pers'),box=$('persbox'),cur=sel!==undefined?sel:s.value;
+  s.textContent='';
+  if(!c){box.hidden=true;return}
+  box.hidden=false;
+  const add=(v,t)=>{const o=document.createElement('option');o.value=v;o.textContent=t;s.append(o)};
+  add('','— nessuna —');
+  (c.persone||[]).forEach(p=>add(p,p));
+  s.value=cur&&(c.persone||[]).includes(cur)?cur:'';
+}
+$('addp').onclick=()=>{
+  const c=S.clients.find(x=>x.nome.toLowerCase()===$('f-cliente').value.trim().toLowerCase()),v=$('f-newp').value.trim();
+  if(!c||!v)return;c.persone=c.persone||[];if(!c.persone.includes(v))c.persone.push(v);
+  save();$('f-newp').value='';drawPers(v)};
+function persUI(c,cc){
+  cc.persone=cc.persone||[];
+  const box=el('div');box.style.margin='10px 0';box.append(el('div','PERSONE','mut'));
+  const lst=el('div');
+  const draw=()=>{lst.textContent='';
+    if(!cc.persone.length)lst.append(el('div','Nessuna persona aggiunta.','mut'));
+    cc.persone.forEach(p=>{const r=el('div');r.style.cssText='display:flex;gap:8px;align-items:center;padding:3px 0';
+      const nm=el('span',p);nm.style.flex='1';
+      const x=el('button','✕');x.style.padding='4px 10px';
+      x.onclick=()=>{cc.persone=cc.persone.filter(z=>z!==p);save();draw()};
+      r.append(nm,x);lst.append(r)})};
+  draw();
+  const row=el('div',null,'row'),inp=document.createElement('input');inp.placeholder='Aggiungi persona';inp.style.margin='6px 0 0';
+  const b=el('button','Aggiungi');b.style.cssText='flex:0 0 auto;margin-top:6px';
+  b.onclick=()=>{const v=inp.value.trim();if(!v)return;if(!cc.persone.includes(v))cc.persone.push(v);save();inp.value='';draw()};
+  row.append(inp,b);box.append(lst,row);c.append(box)}
+
+/* estratto completo di un cliente: anni, mesi, settimane, totale */
+function isoWeek(ds){const d=new Date(ds+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)+3);
+  const y=d.getUTCFullYear(),j=new Date(Date.UTC(y,0,4));
+  const w=1+Math.round(((d-j)/864e5-3+((j.getUTCDay()+6)%7))/7);return y+'-S'+String(w).padStart(2,'0')}
+function clientData(n){
+  const L=S.reports.filter(r=>r.cliente===n).sort((a,b)=>a.data<b.data?-1:1);
+  const add=(o,r)=>{o.u++;o.ore+=r.ore;o.km+=r.km;o.costo+=(r.costo||0);return o};
+  const mk=kf=>{const m={};L.forEach(r=>{const k=kf(r);add(m[k]=m[k]||{u:0,ore:0,km:0,costo:0},r)});return Object.keys(m).sort().map(k=>[k,m[k]])};
+  return{L,anni:mk(r=>r.data.slice(0,4)),mesi:mk(r=>r.data.slice(0,7)),sett:mk(r=>isoWeek(r.data)),tot:L.reduce(add,{u:0,ore:0,km:0,costo:0})};
+}
+async function exportCliente(n,kind,btn,chk){
+  const D=clientData(n),old=btn.textContent,say=t=>{btn.textContent=t;setTimeout(()=>{btn.textContent=old},2500)};
+  if(!D.L.length){say('Nessun lavoro');return}
+  const sel=k=>!chk||chk[k].checked;
+  if(chk&&!Object.values(chk).some(c=>c.checked)){say('Scegli cosa includere');return}
+  const f=x=>x.split('-').reverse().join('/'),slug=n.replace(/[^a-z0-9]+/gi,'-');
+  const labA=k=>k,labM=k=>k.slice(5)+'/'+k.slice(0,4),labS=k=>'Sett. '+k.slice(6)+'/'+k.slice(0,4);
+  let file,name;
+  if(kind==='csv'){
+    const q=v=>'"'+String(v).replace(/"/g,'""')+'"',row=a=>a.map(q).join(';'),t=o=>[o.u,fmt(o.ore),fmt(o.km),fmt(o.costo)];
+    const L=[row(['Cliente',n])];
+    if(sel('elenco')){L.push('',row(['ELENCO LAVORI']),row(['Data','Persona','Lavoro','Ore','Km','Materiali','Costo materiali','Fatturato']));
+      D.L.forEach(r=>L.push(row([f(r.data),r.pers||'',r.lavoro,fmt(r.ore),fmt(r.km),r.mat.join(' | '),fmt(r.costo||0),r.fatt?'Sì':'No'])))}
+    [['anni','TOTALI PER ANNO',D.anni,labA],['mesi','TOTALI PER MESE',D.mesi,labM],['sett','TOTALI PER SETTIMANA',D.sett,labS]].filter(s=>sel(s[0])).forEach(([,tit,arr,lab])=>{
+      L.push('',row([tit]),row(['Periodo','Uscite','Ore','Km','Costo materiali']));arr.forEach(([k,o])=>L.push(row([lab(k),...t(o)])))});
+    if(sel('tot'))L.push('',row(['TOTALE GENERALE','Uscite','Ore','Km','Costo materiali']),row(['',...t(D.tot)]));
+    file='\ufeff'+L.join('\r\n');name='estratto-'+slug+'.csv';
+  }else{
+    if(!window.jspdf){say('PDF non disponibile');return}
+    const doc=new window.jspdf.jsPDF({unit:'mm',format:'a4'});let y=20;
+    const nl=h=>{if(y+h>285){doc.addPage();y=20}};
+    const put=(t,sz,b)=>{doc.setFontSize(sz);doc.setFont('helvetica',b?'bold':'normal');doc.splitTextToSize(String(t),170).forEach(l=>{nl(sz*0.5);doc.text(l,20,y);y+=sz*0.5})};
+    const tab=(tit,arr,lab)=>{y+=3;nl(20);put(tit,12,1);const xs=[20,75,100,125,150];
+      const rw=(a,b)=>{nl(6);doc.setFontSize(10);doc.setFont('helvetica',b?'bold':'normal');a.forEach((v,i)=>doc.text(String(v),xs[i],y));y+=5.5};
+      rw(['Periodo','Uscite','Ore','Km','Materiali EUR'],1);arr.forEach(([k,o])=>rw([lab(k),o.u,fmt(o.ore),fmt(o.km),fmt(o.costo)]))};
+    put('Estratto lavori',18,1);y+=2;put('Cliente: '+n,12);
+    if(sel('tot'))tab('Totale generale',[['Totale',D.tot]],k=>k);
+    if(sel('anni'))tab('Totali per anno',D.anni,labA);if(sel('mesi'))tab('Totali per mese',D.mesi,labM);if(sel('sett'))tab('Totali per settimana',D.sett,labS);
+    if(sel('elenco')){y+=5;nl(20);put('Elenco lavori',12,1);
+      D.L.forEach(r=>put(f(r.data)+(r.pers?' - '+r.pers:'')+' - '+fmt(r.ore)+' h - '+(r.lavoro||'-'),10))}
+    file=doc.output('blob');name='estratto-'+slug+'.pdf';
+  }
+  try{if(!window._d)throw 0;await window._d.save({filename:name,data:file});say('Scaricato ✓')}
+  catch(e){say('Download non disponibile')}
+}
+
+/* backup completo e ripristino */
+const KB='rapportino_lastbk';
+function showLast(){let v=null;try{v=localStorage.getItem(KB)}catch(e){}
+  $('lastbk').textContent=v?'Ultimo backup: '+v.split('-').reverse().join('/'):'Nessun backup ancora. Conviene farlo ogni tanto.'}
+showLast();
+$('bk').onclick=async()=>{
+  const b=$('bk'),old=b.textContent,say=t=>{b.textContent=t;setTimeout(()=>{b.textContent=old},2500)};
+  const data={app:'rapportino',v:1,data:today(),S:{reports:S.reports,clients:S.clients,todos:S.todos}};
+  if($('bk-foto').checked)data.FO=FO;
+  try{if(!window._d)throw 0;
+    await window._d.save({filename:'backup-rapportino-'+today()+'.json',data:JSON.stringify(data)});
+    try{localStorage.setItem(KB,today())}catch(e){}showLast();say('Scaricato ✓')}
+  catch(e){say(e&&e.code==='too_large'?'File troppo grande: togli le foto':'Download non disponibile')}
+};
+let pendRs=null;
+$('rs-file').onchange=e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{try{
+    const j=JSON.parse(rd.result);
+    if(!j||j.app!=='rapportino'||!j.S||!Array.isArray(j.S.reports))throw 0;
+    j.S.clients=j.S.clients||[];j.S.todos=j.S.todos||[];pendRs=j;
+    const nf=j.FO?Object.values(j.FO).reduce((a,x)=>a+x.length,0):0;
+    $('rs-info').textContent='Backup del '+(j.data||'').split('-').reverse().join('/')+': '+j.S.reports.length+' rapportini, '+j.S.clients.length+' clienti, '+j.S.todos.length+' cose da fare'+(nf?', '+nf+' foto':'')+'. «Sostituisci tutto» cancella i dati attuali, «Unisci» aggiunge solo quello che manca.';
+    $('rs-btns').hidden=false;
+  }catch(err){pendRs=null;$('rs-btns').hidden=true;$('rs-info').textContent='Questo file non è un backup valido.'}};
+  rd.readAsText(f)};
+function applyRs(mode){
+  if(!pendRs)return;const j=pendRs;
+  if(mode==='rep'){S={reports:j.S.reports,clients:j.S.clients,todos:j.S.todos};FO=j.FO||{}}
+  else{
+    const ids=new Set(S.reports.map(r=>r.id));
+    j.S.reports.forEach(r=>{if(!ids.has(r.id)){S.reports.push(r);if(j.FO&&j.FO[r.id])FO[r.id]=j.FO[r.id]}});
+    j.S.clients.forEach(c=>{const x=S.clients.find(z=>z.nome.toLowerCase()===c.nome.toLowerCase());
+      if(!x)S.clients.push(c);else{x.persone=x.persone||[];(c.persone||[]).forEach(p=>{if(!x.persone.includes(p))x.persone.push(p)})}});
+    const ti=new Set(S.todos.map(t=>t.id));j.S.todos.forEach(t=>{if(!ti.has(t.id))S.todos.push(t)});
+    S.reports.sort((a,b)=>a.data<b.data?1:-1);
+  }
+  S.clients=S.clients||[];
+  saveFo();save();pendRs=null;$('rs-btns').hidden=true;
+  $('rs-info').textContent=(mode==='rep'?'Dati sostituiti':'Dati uniti')+' ✓';
+  drawReg();drawTodos();
+}
+$('rs-merge').onclick=()=>applyRs('merge');$('rs-rep').onclick=()=>applyRs('rep');
+
+/* da fare */
+function drawTodos(){
+  const b=$('todos');b.textContent='';
+  if(!S.todos.length)b.append(el('p','Niente da fare. 🎉','mut'));
+  S.todos.slice().sort((a,b)=>a.fatto-b.fatto).forEach(t=>{
+    const it=el('div',null,'item');const l=el('label',null);l.style.cssText='display:flex;gap:10px;align-items:center;color:inherit;font-size:1rem;flex:1';
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=t.fatto;cb.style.cssText='width:auto;margin:0';
+    cb.onchange=()=>{t.fatto=cb.checked;save();drawTodos()};
+    l.append(cb,el('span',t.t,t.fatto?'done':''));
+    const x=el('button','✕');x.onclick=()=>{S.todos=S.todos.filter(z=>z!==t);save();drawTodos()};
+    it.append(l,x);b.append(it)});
+}
+$('addt').onclick=()=>{const v=$('nt').value.trim();if(!v)return;S.todos.unshift({id:uid(),t:v,fatto:false});$('nt').value='';save();drawTodos()};
+
+</script>
+</body>
+</html>
