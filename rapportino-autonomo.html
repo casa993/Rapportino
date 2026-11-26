@@ -103,6 +103,7 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--mut);letter-spa
 <div id="clienti"></div>
 <div id="dett"></div>
 <button id="csv" style="width:100%;margin-top:8px">Esporta in Excel (CSV)</button>
+<button id="pdfall" style="width:100%;margin-top:8px">Esporta in PDF</button>
 <div class="card" style="margin-top:16px">
 <h2>Backup completo</h2>
 <p class="mut" id="lastbk"></p>
@@ -481,6 +482,38 @@ function applyRs(mode){
   drawReg();drawTodos();
 }
 $('rs-merge').onclick=()=>applyRs('merge');$('rs-rep').onclick=()=>applyRs('rep');
+
+/* PDF di tutto il registro (rispetta mese e "solo da fatturare") */
+async function exportAllPdf(btn){
+  const old=btn.textContent,say=t=>{btn.textContent=t;setTimeout(()=>{btn.textContent=old},2500)};
+  const L=fr().slice().sort((a,b)=>a.data<b.data?-1:1);
+  if(!L.length){say('Nessun lavoro');return}
+  if(!window.jspdf){say('PDF non disponibile');return}
+  const f=x=>x.split('-').reverse().join('/');
+  const doc=new window.jspdf.jsPDF({unit:'mm',format:'a4'});let y=20;
+  const nl=h=>{if(y+h>285){doc.addPage();y=20}};
+  const put=(t,sz,b)=>{doc.setFontSize(sz);doc.setFont('helvetica',b?'bold':'normal');doc.splitTextToSize(String(t),170).forEach(l=>{nl(sz*0.5);doc.text(l,20,y);y+=sz*0.5})};
+  const sum=a=>a.reduce((o,r)=>{o.ore+=r.ore;o.km+=r.km;o.costo+=(r.costo||0);return o},{ore:0,km:0,costo:0});
+  const m=$('mese').value,s=$('solo').checked,tot=sum(L);
+  put('Registro lavori',18,1);y+=2;
+  put('Periodo: '+(m?m.slice(5)+'/'+m.slice(0,4):'tutti i mesi')+(s?' - solo da fatturare':''),11);
+  put('Lavori: '+L.length+'   Ore: '+fmt(tot.ore)+'   Km: '+fmt(tot.km)+'   Materiali EUR: '+fmt(tot.costo),11,1);
+  const g={};L.forEach(r=>{(g[r.cliente]=g[r.cliente]||[]).push(r)});
+  Object.keys(g).sort().forEach(n=>{
+    const a=g[n],ts=sum(a);
+    y+=4;nl(24);put(n,13,1);
+    put(a.length+(a.length===1?' lavoro':' lavori')+' - '+fmt(ts.ore)+' h - '+fmt(ts.km)+' km'+(ts.costo?' - materiali EUR '+fmt(ts.costo):''),10);
+    a.forEach(r=>{
+      nl(16);put(f(r.data)+(r.pers?' - '+r.pers:'')+' - '+fmt(r.ore)+' h'+(r.fatt?' - fatturato':''),10,1);
+      put(r.lavoro||'-',10);
+      if(r.mat.length)put('Materiali: '+r.mat.join(', ')+(r.costo?' (EUR '+fmt(r.costo)+')':''),10);
+      if(r.prob)put('Problemi: '+r.prob,10);
+      y+=1.5});
+  });
+  try{if(!window._d)throw 0;await window._d.save({filename:'registro-lavori'+(m?'-'+m:'')+'.pdf',data:doc.output('blob')});say('Scaricato \u2713')}
+  catch(e){say('Download non disponibile')}
+}
+$('pdfall').onclick=()=>exportAllPdf($('pdfall'));
 
 /* da fare */
 function drawTodos(){
