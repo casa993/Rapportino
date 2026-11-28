@@ -54,6 +54,12 @@ label{display:block;font-size:.85rem;font-weight:600;color:var(--mut);letter-spa
 .badge{font-size:.76rem;margin-left:8px;padding:3px 10px;border-radius:99px;background:var(--tint);color:var(--warn);font-weight:700;white-space:nowrap;vertical-align:middle}
 .badge.ok{color:var(--ac)}
 #sug button{width:100%;text-align:left;border:0;background:transparent;min-height:50px}
+input[type=date],input[type=month]{display:block;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;text-align:left;min-height:56px}
+.dot{display:inline-block;width:16px;height:16px;border-radius:50%;flex:0 0 16px}
+.dot.g{background:#16a34a;box-shadow:0 0 0 4px rgba(22,163,74,.18)}
+.dot.r{background:#dc2626;box-shadow:0 0 0 4px rgba(220,38,38,.18)}
+.dot.n{background:var(--bd)}
+.dot.in{width:12px;height:12px;flex:0 0 12px;margin-right:8px;vertical-align:middle;box-shadow:none}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -237,8 +243,8 @@ function drawReg(sel){
   const card=el('div',null,'card');
   if(!names.length)card.append(el('p','Nessun rapportino ancora.','mut'));
   names.forEach(n=>{const t=totali(g[n]);const it=el('div',null,'item cl');
-    const l=el('div');l.append(el('b',n),el('div',t.u+(t.u===1?' uscita · ':' uscite · ')+fmt(t.ore)+' ore','mut'));
-    it.append(l,el('span','›'));it.onclick=()=>showCl(n,g[n]);card.append(it)});
+    const l=el('div');const ps=payState(n);l.append(el('b',n),el('div',t.u+(t.u===1?' uscita · ':' uscite · ')+fmt(t.ore)+' ore'+(ps.u?' · '+ps.u+' da pagare':''),'mut'));
+    const lw=el('div');lw.style.cssText='display:flex;align-items:center;gap:14px;min-width:0;flex:1';lw.append(mkDot(ps.cls),l);it.append(lw,el('span','›'));it.onclick=()=>showCl(n,g[n]);card.append(it)});
   box.append(card);
   if(sel&&g[sel])showCl(sel,g[sel]);
 }
@@ -248,6 +254,9 @@ function showCl(n,list){
   const t=totali(list),d=$('dett');d.textContent='';const c=el('div',null,'card');
   const back=el('button','← Torna ai clienti');back.style.cssText='width:100%;margin-bottom:10px';back.onclick=closeCl;c.append(back);
   c.append(el('h2','Resoconto · '+n));
+  const sl=el('div');sl.style.cssText='display:flex;align-items:center;gap:10px;margin:-2px 0 12px';
+  const upd=()=>{const ps=payState(n);sl.textContent='';sl.append(mkDot(ps.cls),el('b',ps.u?'Da pagare: '+ps.u+(ps.u===1?' lavoro':' lavori'):(ps.all?'Tutto pagato':'Nessun lavoro')))};
+  upd();c.append(sl);
   let cc=S.clients.find(x=>x.nome===n);if(!cc){cc={id:uid(),nome:n,ind:'',tel:'',persone:[]};S.clients.push(cc)}
   if(cc){c.append(el('div',[cc.ind,cc.tel].filter(Boolean).join(' · ')||'Nessun indirizzo o telefono','mut'));
     const dx=el('button','Elimina cliente');dx.style.margin='8px 0';
@@ -278,7 +287,7 @@ function showCl(n,list){
     const f=x=>x.split('-').reverse().join('/');
     const it=el('div',null,'job'),head=el('div',null,'jobh'),l=el('div');
     l.style.cssText='min-width:0;flex:1';
-    const tt=el('div');tt.append(el('b',f(r.data)+(r.ore?' · '+fmt(r.ore)+' h':'')));
+    const dj=mkDot(r.pag?'g':'r',true);const tt=el('div');tt.append(dj,el('b',f(r.data)+(r.ore?' · '+fmt(r.ore)+' h':'')));
     const bd=el('span',r.fatt?'Fatturato':'Da fatturare','badge'+(r.fatt?' ok':''));
     const bp=el('span',r.pag?'Pagato':'Da pagare','badge'+(r.pag?' ok':''));tt.append(bd,bp);
     l.append(tt,el('div',(r.pers?r.pers+' · ':'')+(r.lavoro||'—'),'mut one'));
@@ -296,7 +305,7 @@ function showCl(n,list){
       const tg=el('button',r.fatt?'Segna come da fatturare':'Segna come fatturato');tg.style.cssText='width:100%;margin-top:10px';
       tg.onclick=()=>{r.fatt=!r.fatt;save();if($('solo').checked){drawReg(n);return}bd.textContent=r.fatt?'Fatturato':'Da fatturare';bd.className='badge'+(r.fatt?' ok':'');tg.textContent=r.fatt?'Segna come da fatturare':'Segna come fatturato'};
       const tp=el('button',r.pag?'Segna come da pagare':'Segna come pagato');tp.style.cssText='width:100%;margin-top:10px';
-      tp.onclick=()=>{r.pag=!r.pag;save();if($('solopag').checked){drawReg(n);return}bp.textContent=r.pag?'Pagato':'Da pagare';bp.className='badge'+(r.pag?' ok':'');tp.textContent=r.pag?'Segna come da pagare':'Segna come pagato'};
+      tp.onclick=()=>{r.pag=!r.pag;save();if($('solopag').checked){drawReg(n);return}bp.textContent=r.pag?'Pagato':'Da pagare';bp.className='badge'+(r.pag?' ok':'');dj.className='dot '+(r.pag?'g':'r')+' in';upd();tp.textContent=r.pag?'Segna come da pagare':'Segna come pagato'};
       dv.append(tg,tp);bx.append(mb,pb,x);dv.append(bx)};
     head.onclick=()=>{if(dv.hidden)det();dv.hidden=!dv.hidden;it.classList.toggle('open',!dv.hidden)};
     it.append(head,dv);c.append(it)});
@@ -659,6 +668,10 @@ async function quotePdf(q){
   try{if(!window._d)throw 0;await window._d.save({filename:name,data:doc.output('blob')})}
   catch(e){alert('Download del PDF non disponibile qui.')}
 }
+
+/* pallini di stato pagamento */
+function payState(n){const all=S.reports.filter(r=>r.cliente===n),u=all.filter(r=>!r.pag).length;return{all:all.length,u,cls:!all.length?'n':(u?'r':'g')}}
+function mkDot(cls,inl){return el('span',null,'dot '+cls+(inl?' in':''))}
 
 /* da fare */
 function drawTodos(){
