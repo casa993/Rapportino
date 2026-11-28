@@ -236,15 +236,15 @@ function totali(list){
   return{u:list.length,ore:list.reduce((a,r)=>a+r.ore,0),km:list.reduce((a,r)=>a+r.km,0),costo:list.reduce((a,r)=>a+(r.costo||0),0),mat:Object.values(m)};
 }
 function drawReg(sel){
-  const q=$('cerca').value.toLowerCase(),box=$('clienti');box.textContent='';box.hidden=false;$('dett').textContent='';
+  const q=$('cerca').value.toLowerCase(),box=$('clienti');box.textContent='';LI={};box.hidden=false;$('dett').textContent='';
   const g={};fr().forEach(r=>{(g[r.cliente]=g[r.cliente]||[]).push(r)});
   if(!$('mese').value&&!$('solo').checked&&!$('solopag').checked)S.clients.forEach(c=>{if(!g[c.nome])g[c.nome]=[]});
   const names=Object.keys(g).filter(n=>n.toLowerCase().includes(q)||((S.clients.find(c=>c.nome===n)||{}).persone||[]).some(p=>p.toLowerCase().includes(q))).sort();
   const card=el('div',null,'card');
   if(!names.length)card.append(el('p','Nessun rapportino ancora.','mut'));
   names.forEach(n=>{const t=totali(g[n]);const it=el('div',null,'item cl');
-    const l=el('div');const ps=payState(n);l.append(el('b',n),el('div',t.u+(t.u===1?' uscita · ':' uscite · ')+fmt(t.ore)+' ore'+(ps.u?' · '+ps.u+' da pagare':''),'mut'));
-    const lw=el('div');lw.style.cssText='display:flex;align-items:center;gap:14px;min-width:0;flex:1';lw.append(mkDot(ps.cls),l);it.append(lw,el('span','›'));it.onclick=()=>showCl(n,g[n]);card.append(it)});
+    const l=el('div');const ps=payState(n),base=t.u+(t.u===1?' uscita · ':' uscite · ')+fmt(t.ore)+' ore',sub=el('div',base+(ps.u?' · '+ps.u+' da pagare':''),'mut'),dd=mkDot(ps.cls);LI[n]={dot:dd,sub,base};l.append(el('b',n),sub);
+    const lw=el('div');lw.style.cssText='display:flex;align-items:center;gap:14px;min-width:0;flex:1';lw.append(dd,l);it.append(lw,el('span','›'));it.onclick=()=>showCl(n,g[n]);card.append(it)});
   box.append(card);
   if(sel&&g[sel])showCl(sel,g[sel]);
 }
@@ -255,7 +255,7 @@ function showCl(n,list){
   const back=el('button','← Torna ai clienti');back.style.cssText='width:100%;margin-bottom:10px';back.onclick=closeCl;c.append(back);
   c.append(el('h2','Resoconto · '+n));
   const sl=el('div');sl.style.cssText='display:flex;align-items:center;gap:10px;margin:-2px 0 12px';
-  const upd=()=>{const ps=payState(n);sl.textContent='';sl.append(mkDot(ps.cls),el('b',ps.u?'Da pagare: '+ps.u+(ps.u===1?' lavoro':' lavori'):(ps.all?'Tutto pagato':'Nessun lavoro')))};
+  const upd=()=>{const ps=payState(n);const x=LI[n];if(x){x.dot.className='dot '+ps.cls;x.sub.textContent=x.base+(ps.u?' · '+ps.u+' da pagare':'')}sl.textContent='';sl.append(mkDot(ps.cls),el('b',ps.u?'Da pagare: '+ps.u+(ps.u===1?' lavoro':' lavori'):(ps.all?'Tutto pagato':'Nessun lavoro')))};
   upd();c.append(sl);
   let cc=S.clients.find(x=>x.nome===n);if(!cc){cc={id:uid(),nome:n,ind:'',tel:'',persone:[]};S.clients.push(cc)}
   if(cc){c.append(el('div',[cc.ind,cc.tel].filter(Boolean).join(' · ')||'Nessun indirizzo o telefono','mut'));
@@ -670,6 +670,7 @@ async function quotePdf(q){
 }
 
 /* pallini di stato pagamento */
+let LI={};
 function payState(n){const all=S.reports.filter(r=>r.cliente===n),u=all.filter(r=>!r.pag).length;return{all:all.length,u,cls:!all.length?'n':(u?'r':'g')}}
 function mkDot(cls,inl){return el('span',null,'dot '+cls+(inl?' in':''))}
 
